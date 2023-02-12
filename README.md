@@ -6,7 +6,7 @@ Created by [@tinchoabbate](https://twitter.com/tinchoabbate) at OpenZeppelin
 
 ## Play
 
-Visit [damnvulnerabledefi.xyz](https://damnvulnerabledefi.xyz)!
+Visit [damnvulnerabledefi.xyz](https://damnvulnerabledefi.xyz)!!
 
 ## Troubleshooting
 
