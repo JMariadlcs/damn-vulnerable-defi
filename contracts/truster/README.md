@@ -1,0 +1,1 @@
+To solve this challenge we need to create a contract with a function, which is going to be called using the `.call` function in the TrusterLenderPool that calls an `approve` function with the max amount of tokens so we can later transfer all of them and drain the pool.
