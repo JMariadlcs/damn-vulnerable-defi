@@ -20,13 +20,14 @@ contract PuppetPool is ReentrancyGuard {
     }
 
     // Allows borrowing `borrowAmount` of tokens by first depositing two times their value in ETH
-    function borrow(uint256 borrowAmount) public payable nonReentrant {
+    // pool has 100000 DVTs
+    function borrow(uint256 borrowAmount) public payable nonReentrant { // borrowAmount = 100000
         uint256 amountToDeposit = msg.value;
 
-        uint256 tokenPriceInWei = computeOraclePrice();
-        uint256 depositRequired = borrowAmount.mul(tokenPriceInWei) * 2;
+        uint256 tokenPriceInWei = computeOraclePrice(); // 0
+        uint256 depositRequired = borrowAmount.mul(tokenPriceInWei) * 2; // will be 0
         
-        require(amountToDeposit >= depositRequired, "Not depositing enough collateral");
+        require(amountToDeposit >= depositRequired, "Not depositing enough collateral"); // msg.value can be 0
         if (amountToDeposit > depositRequired) {
             uint256 amountToReturn = amountToDeposit - depositRequired;
             amountToDeposit -= amountToReturn;

